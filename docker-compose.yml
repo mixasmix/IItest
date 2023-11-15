@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  database:
+    image: postgres:${POSTGRES_VERSION:-15}-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-!ChangeMe!}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+    ports:
+      - "49187:5432"
+  php:
+    container_name: php_test
+    build:
+      context: ./docker/php-fpm
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./:/var/www/api
+      - ./.env:/var/www/api/.env.local
+      - ./composer.json:/var/www/api/composer.json
+    depends_on:
+      - database
+    tty: true
+    restart: always
+  nginx:
+    container_name: nginx_test
+    image: nginx:stable-alpine
+    ports:
+      - '8010:80'
+    volumes:
+      - ./:/var/www/api
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+      - database
+
+volumes:
+  database_data:
