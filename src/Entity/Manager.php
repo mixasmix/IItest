@@ -3,8 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\ManagerRepository;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ManagerRepository::class)]
@@ -16,10 +18,13 @@ class Manager
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $firstName = null;
+    private string $firstName;
 
     #[ORM\Column(length: 255)]
-    private ?string $lastName = null;
+    private string $lastName;
+
+    #[ORM\Column(type: Types::DATE_IMMUTABLE)]
+    private DateTimeImmutable $birthdate;
 
     #[ORM\OneToMany(mappedBy: 'manager', targetEntity: Order::class)]
     private Collection $orders;
@@ -84,6 +89,18 @@ class Manager
                 $order->setManager(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getBirthdate(): DateTimeImmutable
+    {
+        return $this->birthdate;
+    }
+
+    public function setBirthdate(DateTimeImmutable $birthdate): self
+    {
+        $this->birthdate = $birthdate;
 
         return $this;
     }

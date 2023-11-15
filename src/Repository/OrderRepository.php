@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Order;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,33 +17,35 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class OrderRepository extends ServiceEntityRepository
 {
+    public const ORDER_PER_PAGE = 10;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
     }
+    public function add(Order $order, bool $flush = false): Order
+    {
+        $this->getEntityManager()->persist($order);
 
-//    /**
-//     * @return Order[] Returns an array of Order objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('o.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+        if ($flush) {
+            $this->flush();
+        }
 
-//    public function findOneBySomeField($value): ?Order
-//    {
-//        return $this->createQueryBuilder('o')
-//            ->andWhere('o.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $order;
+    }
+
+    public function getOrdersByPage(?int $limit = self::ORDER_PER_PAGE, ?int $offset = null): Paginator
+    {
+        $query = $this->createQueryBuilder('o')->orderBy('o.id');
+
+        if (!empty($limit)) {
+            $query->setMaxResults($limit);
+        }
+
+        if (!is_null($offset)) {
+            $query->setFirstResult($offset);
+        }
+
+        return new Paginator($query);
+    }
 }

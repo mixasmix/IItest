@@ -21,28 +21,14 @@ class ManagerRepository extends ServiceEntityRepository
         parent::__construct($registry, Manager::class);
     }
 
-//    /**
-//     * @return Manager[] Returns an array of Manager objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function add(Manager $manager, bool $flush = false): Manager
+    {
+        $this->getEntityManager()->persist($manager);
 
-//    public function findOneBySomeField($value): ?Manager
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        if ($flush) {
+            $this->flush();
+        }
+
+        return $manager;
+    }
 }
